@@ -1,0 +1,66 @@
+cidr_networks: &cidr_networks
+  container: 172.29.236.0/22
+  tunnel: 172.29.240.0/22
+  storage: 172.29.244.0/22
+
+global_overrides:
+  external_lb_vip_address: 172.29.236.11
+  internal_lb_vip_address: 10.58.11.1
+  provider_networks:
+    - network:
+        group_binds:
+          - all_containers
+          - hosts
+        type: "raw"
+        container_bridge: "br-mgmt"
+        container_interface: "eth1"
+        container_type: "veth"
+        ip_from_q: "container"
+        is_container_address: true
+    - network:
+        group_binds:
+          - neutron_linuxbridge_agent
+        container_bridge: "br-vxlan"
+        container_type: "veth"
+        container_interface: "eth10"
+        container_mtu: "9000"
+        ip_from_q: "tunnel"
+        type: "vxlan"
+        range: "1:1000"
+        net_name: "vxlan"
+    - network:
+        group_binds:
+          - neutron_linuxbridge_agent
+        container_bridge: "br-vlan"
+        container_type: "veth"
+        container_interface: "eth11"
+        type: "vlan"
+        range: "101:200,301:400"
+        net_name: "vlan"
+    - network:
+        group_binds:
+          - neutron_linuxbridge_agent
+        container_bridge: "br-vlan"
+        container_type: "veth"
+        container_interface: "eth12"
+        host_bind_override: "eth12"
+        type: "flat"
+        net_name: "flat"
+
+###
+### Infrastructure
+###
+
+_infrastructure_hosts: &infrastructure_hosts
+  infra1:
+    ip: 172.29.236.11
+
+shared-infra_hosts: *infrastructure_hosts
+repo-infra_hosts: *infrastructure_hosts
+haproxy_hosts: *infrastructure_hosts
+identity_hosts: *infrastructure_hosts
+storage_hosts: *infrastructure_hosts
+image_hosts: *infrastructure_hosts
+compute-infra_hosts: *infrastructure_hosts
+dashboard_hosts: *infrastructure_hosts
+network_hosts: *infrastructure_hosts
